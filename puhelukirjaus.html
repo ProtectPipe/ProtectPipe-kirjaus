@@ -376,6 +376,8 @@
     document.getElementById('submitBtn').classList.toggle('ready', !!ready);
   }
 
+  const SHEET_URL = 'https://script.google.com/a/macros/protectpipe.fi/s/AKfycbzQL-mftYg0kB6CDuCQSX7pLWYceQwZDkiRDOkSJVjGw68ifbGeFqXVFXYRLTkYfEI/exec';
+
   function submitCall() {
     if (!state.seg || !state.ans) return;
 
@@ -394,6 +396,31 @@
       earnings
     };
     log.unshift(entry);
+
+    // Näytä "Lähetetään..." heti
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.textContent = '⏳ Lähetetään Sheettiin...';
+    submitBtn.classList.remove('ready');
+
+    // Image pixel -tekniikka — toimii aina ilman CORS-rajoituksia
+    const params = new URLSearchParams({
+      seg: entry.seg,
+      ans: entry.ans,
+      buuk: entry.buuk,
+      warm: entry.warm
+    });
+
+    const img = new Image();
+    img.onload = () => {
+      submitBtn.textContent = '✅ Kirjattu Sheettiin!';
+      setTimeout(() => { submitBtn.textContent = 'Kirjaa puhelu →'; }, 2500);
+    };
+    img.onerror = () => {
+      // Google palauttaa JSONin eikä kuvaa, joten onerror = pyyntö meni läpi
+      submitBtn.textContent = '✅ Kirjattu Sheettiin!';
+      setTimeout(() => { submitBtn.textContent = 'Kirjaa puhelu →'; }, 2500);
+    };
+    img.src = SHEET_URL + '?' + params.toString();
 
     const row = `${dateStr}\t${entry.seg}\t${entry.ans}\t${entry.buuk}\t${entry.warm}\t${earnings > 0 ? '€'+earnings : ''}`;
     document.getElementById('copyText').textContent = row;
