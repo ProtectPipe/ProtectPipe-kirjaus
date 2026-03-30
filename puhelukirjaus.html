@@ -394,8 +394,7 @@
   let currentUser = null;
 
   function setUser(name) {
-    currentUser = name;
-    document.getElementById('userScreen').style.display = 'none';
+    currentUser = name;  // Samuli tai Aki — säilyttää ison alkukirjaimen
     const badge = document.getElementById('userBadge');
     badge.textContent = name;
     badge.style.display = 'inline-block';
@@ -446,7 +445,7 @@
     document.getElementById('submitBtn').classList.toggle('ready', !!ready);
   }
 
-  const SHEET_URL = 'https://script.google.com/a/macros/protectpipe.fi/s/AKfycbzQL-mftYg0kB6CDuCQSX7pLWYceQwZDkiRDOkSJVjGw68ifbGeFqXVFXYRLTkYfEI/exec';
+  const SHEET_URL = 'https://script.google.com/a/macros/protectpipe.fi/s/AKfycbzk_phjkN05e4tFeiYimfBPGXxO1CiOO3sj8TmDpc8Ex2IQESSgBR_T4JolQKnQ0nQ/exec';
 
   function submitCall() {
     if (!state.seg || !state.ans) return;
