@@ -195,7 +195,50 @@
 
   .empty-state { text-align: center; color: #3a5068; padding: 20px 0; font-size: 13px; }
 
-  /* ── SEGMENT SUMMARY ── */
+  /* ── USER SELECTION ── */
+  #userScreen {
+    position: fixed;
+    inset: 0;
+    background: #0f1923;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 32px;
+  }
+  #userScreen h2 { font-size: 20px; font-weight: 800; color: #00c6ff; margin-bottom: 8px; }
+  #userScreen p  { font-size: 13px; color: #7a8fa6; margin-bottom: 32px; }
+  .user-btn {
+    width: 100%;
+    max-width: 320px;
+    padding: 22px;
+    border-radius: 16px;
+    border: 2px solid #243347;
+    background: #1a2636;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 800;
+    cursor: pointer;
+    margin-bottom: 14px;
+    transition: all 0.15s;
+    letter-spacing: 0.5px;
+  }
+  .user-btn:active { transform: scale(0.97); }
+  .user-btn.samuli { border-color: #0077cc; }
+  .user-btn.samuli:hover { background: #0077cc; }
+  .user-btn.aki    { border-color: #cc44ff; }
+  .user-btn.aki:hover    { background: #6a1aaa; }
+  #userBadge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 8px;
+    cursor: pointer;
+    vertical-align: middle;
+  }
   .seg-row {
     display: grid;
     grid-template-columns: 1fr 40px 40px 40px 50px;
@@ -221,9 +264,17 @@
 <body>
 
 <header>
-  <h1>⚡ PROTECTPIPE</h1>
+  <h1>⚡ PROTECTPIPE <span id="userBadge" onclick="changeUser()" style="display:none"></span></h1>
   <p>Puhelukirjaus — 4 nappia ja valmis</p>
 </header>
+
+<!-- USER SELECTION SCREEN -->
+<div id="userScreen">
+  <h2>⚡ PROTECTPIPE</h2>
+  <p>Kuka kirjaa puheluita tänään?</p>
+  <button class="user-btn samuli" onclick="setUser('Samuli')">👤 Samuli</button>
+  <button class="user-btn aki"    onclick="setUser('Aki')">👤 Aki</button>
+</div>
 
 <!-- EARNINGS BAR -->
 <div class="earnings-bar">
@@ -340,6 +391,25 @@
 <script>
   const state = { seg: null, ans: null, buuk: null, warm: null };
   const log = [];
+  let currentUser = null;
+
+  function setUser(name) {
+    currentUser = name;
+    document.getElementById('userScreen').style.display = 'none';
+    const badge = document.getElementById('userBadge');
+    badge.textContent = name;
+    badge.style.display = 'inline-block';
+    badge.style.background = name === 'Samuli' ? '#0077cc' : '#6a1aaa';
+    badge.title = 'Vaihda käyttäjä';
+  }
+
+  function changeUser() {
+    if (confirm('Vaihda käyttäjä?')) {
+      currentUser = null;
+      document.getElementById('userScreen').style.display = 'flex';
+      document.getElementById('userBadge').style.display = 'none';
+    }
+  }
 
   function select(type, value, btn) {
     state[type] = value;
@@ -404,6 +474,7 @@
 
     // Image pixel -tekniikka — toimii aina ilman CORS-rajoituksia
     const params = new URLSearchParams({
+      user: currentUser,
       seg: entry.seg,
       ans: entry.ans,
       buuk: entry.buuk,
