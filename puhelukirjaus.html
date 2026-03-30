@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ProtectPipe – Puhelukirjaus</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0f1923;
+    color: #fff;
+    min-height: 100vh;
+    padding: 16px;
+  }
+
+  header {
+    text-align: center;
+    padding: 12px 0 20px;
+  }
+  header h1 { font-size: 18px; font-weight: 700; letter-spacing: 1px; color: #00c6ff; }
+  header p  { font-size: 12px; color: #7a8fa6; margin-top: 4px; }
+
+  /* ── STEP CARDS ── */
+  .card {
+    background: #1a2636;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 14px;
+    border: 1px solid #243347;
+  }
+  .card-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #7a8fa6;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  /* ── BUTTON GRID ── */
+  .btn-grid {
+    display: grid;
+    gap: 10px;
+  }
+  .btn-grid.cols2 { grid-template-columns: 1fr 1fr; }
+  .btn-grid.cols3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  .btn {
+    padding: 14px 8px;
+    border-radius: 12px;
+    border: 2px solid transparent;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s ease;
+    background: #243347;
+    color: #c5d3e0;
+    line-height: 1.3;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:active { transform: scale(0.96); }
+
+  /* Segment colors */
+  .btn.seg { border-color: #1e3a5f; }
+  .btn.seg.active { background: #0077cc; border-color: #00a8ff; color: #fff; }
+
+  /* Answer colors */
+  .btn.ans-yes { border-color: #1a4a2a; }
+  .btn.ans-yes.active { background: #1a7a3a; border-color: #2ecc71; color: #fff; }
+  .btn.ans-no  { border-color: #4a1a1a; }
+  .btn.ans-no.active  { background: #922; border-color: #e74c3c; color: #fff; }
+
+  /* Warmth colors */
+  .btn.warm   { border-color: #4a2a00; }
+  .btn.warm.active   { background: #b85c00; border-color: #ff8c00; color: #fff; }
+  .btn.neutral { border-color: #2a2a4a; }
+  .btn.neutral.active { background: #3a3a7a; border-color: #7a7aff; color: #fff; }
+  .btn.cold   { border-color: #00334a; }
+  .btn.cold.active   { background: #005f8a; border-color: #00c6ff; color: #fff; }
+
+  /* Buukki colors */
+  .btn.buuk-yes { border-color: #2a1a4a; }
+  .btn.buuk-yes.active { background: #6a1aaa; border-color: #cc44ff; color: #fff; }
+  .btn.buuk-no  { border-color: #2a2a2a; }
+  .btn.buuk-no.active  { background: #333; border-color: #888; color: #fff; }
+
+  .btn-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+
+  /* ── SUBMIT BUTTON ── */
+  #submitBtn {
+    width: 100%;
+    padding: 18px;
+    border-radius: 14px;
+    border: none;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    background: linear-gradient(135deg, #0077cc, #00c6ff);
+    color: #fff;
+    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+    opacity: 0.4;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  #submitBtn.ready { opacity: 1; }
+  #submitBtn:active { transform: scale(0.98); }
+
+  /* ── LOG TABLE ── */
+  .log-wrap {
+    background: #1a2636;
+    border-radius: 16px;
+    padding: 16px;
+    border: 1px solid #243347;
+  }
+  .log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .log-title { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: #7a8fa6; text-transform: uppercase; }
+  .log-stats { font-size: 12px; color: #00c6ff; font-weight: 700; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  th { color: #7a8fa6; font-weight: 600; padding: 6px 4px; border-bottom: 1px solid #243347; text-align: left; }
+  td { padding: 8px 4px; border-bottom: 1px solid #1e2e40; color: #c5d3e0; }
+  tr:last-child td { border-bottom: none; }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+  }
+  .tag-yes  { background: #1a4a2a; color: #2ecc71; }
+  .tag-no   { background: #3a1a1a; color: #e74c3c; }
+  .tag-warm { background: #3a2000; color: #ff8c00; }
+  .tag-neu  { background: #1e1e40; color: #9090ff; }
+  .tag-cold { background: #00263a; color: #00c6ff; }
+
+  /* ── COPY BANNER ── */
+  #copyBanner {
+    display: none;
+    background: #1a2636;
+    border: 1px solid #243347;
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+  #copyBanner .label {
+    font-size: 11px; color: #7a8fa6; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;
+  }
+  #copyText {
+    background: #0f1923;
+    border-radius: 8px;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 11px;
+    color: #00c6ff;
+    word-break: break-all;
+    margin-bottom: 10px;
+  }
+  #copyBtn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    background: #243347;
+    color: #fff;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  #copyBtn.copied { background: #1a4a2a; color: #2ecc71; }
+
+  /* ── EARNINGS BAR ── */
+  .earnings-bar {
+    background: linear-gradient(135deg, #1a4a2a, #1a2636);
+    border: 1px solid #2ecc71;
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .earnings-label { font-size: 12px; color: #7a8fa6; }
+  .earnings-value { font-size: 24px; font-weight: 800; color: #2ecc71; }
+  .earnings-sub   { font-size: 11px; color: #7a8fa6; text-align: right; }
+
+  .empty-state { text-align: center; color: #3a5068; padding: 20px 0; font-size: 13px; }
+
+  /* ── SEGMENT SUMMARY ── */
+  .seg-row {
+    display: grid;
+    grid-template-columns: 1fr 40px 40px 40px 50px;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 4px;
+    border-bottom: 1px solid #1e2e40;
+    font-size: 12px;
+  }
+  .seg-row:last-child { border-bottom: none; }
+  .seg-row-hdr {
+    font-size: 10px;
+    font-weight: 700;
+    color: #7a8fa6;
+    letter-spacing: 0.5px;
+  }
+  .seg-name { font-weight: 600; color: #c5d3e0; }
+  .seg-num  { text-align: center; font-weight: 700; }
+  .seg-bar-wrap { grid-column: 1 / -1; height: 3px; background: #1e2e40; border-radius: 2px; margin-top: 2px; }
+  .seg-bar      { height: 3px; border-radius: 2px; background: #0077cc; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚡ PROTECTPIPE</h1>
+  <p>Puhelukirjaus — 4 nappia ja valmis</p>
+</header>
+
+<!-- EARNINGS BAR -->
+<div class="earnings-bar">
+  <div>
+    <div class="earnings-label">Päivän ansiot</div>
+    <div class="earnings-value" id="earningsValue">€0</div>
+  </div>
+  <div class="earnings-sub">
+    <div id="statCalls">0 soitettu</div>
+    <div id="statAnswered">0 vastattu</div>
+    <div id="statConv">0% konversio</div>
+  </div>
+</div>
+
+<!-- STEP 1: SEGMENTTI -->
+<div class="card">
+  <div class="card-title">1 · Asiakassegmentti</div>
+  <div class="btn-grid cols2" id="segGrid">
+    <button class="btn seg" onclick="select('seg', 'Isännöitsijä', this)">
+      <span class="btn-icon">🏢</span>Isännöitsijä
+    </button>
+    <button class="btn seg" onclick="select('seg', 'Kiinteistöpäällikkö', this)">
+      <span class="btn-icon">🔑</span>Kiinteistöpääl.
+    </button>
+    <button class="btn seg" onclick="select('seg', 'Taloyhtiö', this)">
+      <span class="btn-icon">🏠</span>Taloyhtiö
+    </button>
+    <button class="btn seg" onclick="select('seg', 'HPJ', this)">
+      <span class="btn-icon">👔</span>HPJ
+    </button>
+    <button class="btn seg" onclick="select('seg', 'Ravintola', this)">
+      <span class="btn-icon">🍽️</span>Ravintola
+    </button>
+    <button class="btn seg" onclick="select('seg', 'Julkinen sektori', this)">
+      <span class="btn-icon">🏛️</span>Julkinen
+    </button>
+  </div>
+</div>
+
+<!-- STEP 2: VASTATTIINKO -->
+<div class="card">
+  <div class="card-title">2 · Vastattiinko puheluun?</div>
+  <div class="btn-grid cols2">
+    <button class="btn ans-yes" onclick="select('ans', 'Kyllä', this)">
+      <span class="btn-icon">✅</span>Kyllä
+    </button>
+    <button class="btn ans-no" onclick="select('ans', 'Ei', this)">
+      <span class="btn-icon">📵</span>Ei vastattu
+    </button>
+  </div>
+</div>
+
+<!-- STEP 3: BUUKKI -->
+<div class="card" id="cardBuuk" style="display:none">
+  <div class="card-title">3 · Buukki? <span style="color:#3a5068;font-weight:400;font-size:10px">(vapaaehtoinen)</span></div>
+  <div class="btn-grid cols2">
+    <button class="btn buuk-yes" onclick="select('buuk', 'Kyllä', this)">
+      <span class="btn-icon">📅</span>Kyllä, buukki!
+    </button>
+    <button class="btn buuk-no" onclick="select('buuk', 'Ei', this)">
+      <span class="btn-icon">➖</span>Ei buukkia
+    </button>
+  </div>
+</div>
+
+<!-- STEP 4: LÄMPÖISYYS -->
+<div class="card" id="cardWarm" style="display:none">
+  <div class="card-title">4 · Lämpöisyys <span style="color:#3a5068;font-weight:400;font-size:10px">(vapaaehtoinen)</span></div>
+  <div class="btn-grid cols3">
+    <button class="btn warm"    onclick="select('warm', 'Lämmin', this)">
+      <span class="btn-icon">🔥</span>Lämmin
+    </button>
+    <button class="btn neutral" onclick="select('warm', 'Neutraali', this)">
+      <span class="btn-icon">😐</span>Neutraali
+    </button>
+    <button class="btn cold"    onclick="select('warm', 'Kylmä', this)">
+      <span class="btn-icon">❄️</span>Kylmä
+    </button>
+  </div>
+</div>
+
+<!-- SUBMIT + RESET -->
+<div style="display:grid;grid-template-columns:1fr auto;gap:10px;margin-bottom:14px">
+  <button id="submitBtn" onclick="submitCall()" style="margin-bottom:0">Kirjaa puhelu →</button>
+  <button onclick="resetSelections()" style="padding:18px 16px;border-radius:14px;border:1px solid #3a5068;background:#1a2636;color:#7a8fa6;font-size:13px;font-weight:700;cursor:pointer;">↺ Tyhjennä</button>
+</div>
+
+<!-- COPY ROW BANNER -->
+<div id="copyBanner">
+  <div class="label">📋 Kopioi Sheettiin (liitä seuraavaan tyhjään riviin)</div>
+  <div id="copyText"></div>
+  <button id="copyBtn" onclick="copyToClipboard()">📋 Kopioi leikepöydälle</button>
+</div>
+
+<!-- SEGMENT SUMMARY -->
+<div class="log-wrap" id="segSummaryWrap" style="display:none;margin-bottom:14px;">
+  <div class="log-header">
+    <div class="log-title">🎯 Segmenttikohtainen erittely</div>
+  </div>
+  <div id="segSummaryBody"></div>
+</div>
+
+<!-- LOG -->
+<div class="log-wrap">
+  <div class="log-header">
+    <div class="log-title">📊 Päivän kirjaukset</div>
+    <div class="log-stats" id="logStats"></div>
+  </div>
+  <div id="logBody">
+    <div class="empty-state">Ei kirjauksia vielä.<br>Paina napit ja kirjaa ensimmäinen!</div>
+  </div>
+</div>
+
+<script>
+  const state = { seg: null, ans: null, buuk: null, warm: null };
+  const log = [];
+
+  function select(type, value, btn) {
+    state[type] = value;
+
+    const cls = type === 'seg'  ? '.btn.seg'
+              : type === 'ans'  ? '.btn.ans-yes, .btn.ans-no'
+              : type === 'buuk' ? '.btn.buuk-yes, .btn.buuk-no'
+              : '.btn.warm, .btn.neutral, .btn.cold';
+    document.querySelectorAll(cls).forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    // Smart show/hide: reveal cards based on answer
+    if (type === 'ans') {
+      if (value === 'Kyllä') {
+        document.getElementById('cardBuuk').style.display = 'block';
+        document.getElementById('cardWarm').style.display = 'block';
+      } else {
+        // Ei vastattu — piilota buukki & lämpöisyys, nollaa ne
+        document.getElementById('cardBuuk').style.display = 'none';
+        document.getElementById('cardWarm').style.display = 'none';
+        state.buuk = null;
+        state.warm = null;
+        document.querySelectorAll('.btn.buuk-yes,.btn.buuk-no,.btn.warm,.btn.neutral,.btn.cold')
+          .forEach(b => b.classList.remove('active'));
+      }
+    }
+
+    checkReady();
+  }
+
+  function checkReady() {
+    // Pakollisia: seg + ans. Buukki & lämpöisyys vapaaehtoisia.
+    const ready = state.seg && state.ans;
+    document.getElementById('submitBtn').classList.toggle('ready', !!ready);
+  }
+
+  function submitCall() {
+    if (!state.seg || !state.ans) return;
+
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('fi-FI', { day:'2-digit', month:'2-digit' });
+    const timeStr = now.toLocaleTimeString('fi-FI', { hour:'2-digit', minute:'2-digit' });
+    const earnings = state.ans === 'Kyllä' ? 5 : 0;
+
+    const entry = {
+      date: dateStr,
+      time: timeStr,
+      seg: state.seg,
+      ans: state.ans,
+      buuk: state.buuk || '–',
+      warm: state.warm || '–',
+      earnings
+    };
+    log.unshift(entry);
+
+    const row = `${dateStr}\t${entry.seg}\t${entry.ans}\t${entry.buuk}\t${entry.warm}\t${earnings > 0 ? '€'+earnings : ''}`;
+    document.getElementById('copyText').textContent = row;
+    document.getElementById('copyBanner').style.display = 'block';
+
+    const cb = document.getElementById('copyBtn');
+    cb.textContent = '📋 Kopioi leikepöydälle';
+    cb.className = '';
+
+    updateStats();
+    renderLog();
+    resetSelections();
+  }
+
+  function copyToClipboard() {
+    const text = document.getElementById('copyText').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = '✅ Kopioitu!';
+      btn.className = 'copied';
+    }).catch(() => {
+      const el = document.createElement('textarea');
+      el.value = text;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = '✅ Kopioitu!';
+      btn.className = 'copied';
+    });
+  }
+
+  function resetSelections() {
+    state.seg = null; state.ans = null; state.buuk = null; state.warm = null;
+    document.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('cardBuuk').style.display = 'none';
+    document.getElementById('cardWarm').style.display = 'none';
+    checkReady();
+  }
+
+  function updateStats() {
+    const total = log.length;
+    const answered = log.filter(e => e.ans === 'Kyllä').length;
+    const bookedCount = log.filter(e => e.buuk === 'Kyllä').length;
+    const earnings = answered * 5;
+    const conv = total > 0 ? Math.round(answered / total * 100) : 0;
+
+    document.getElementById('earningsValue').textContent = '€' + earnings;
+    document.getElementById('statCalls').textContent = total + ' soitettu';
+    document.getElementById('statAnswered').textContent = answered + ' vastattu';
+    document.getElementById('statConv').textContent = conv + '% konv · ' + bookedCount + ' buukkia';
+  }
+
+  function renderSegmentSummary() {
+    const segments = ['Isännöitsijä','Kiinteistöpäällikkö','Taloyhtiö','HPJ','Ravintola','Julkinen sektori'];
+    const data = {};
+    segments.forEach(s => data[s] = { soitettu: 0, vastattu: 0, buukki: 0 });
+
+    log.forEach(e => {
+      const key = data[e.seg] ? e.seg : null;
+      if (!key) return;
+      data[key].soitettu++;
+      if (e.ans === 'Kyllä') data[key].vastattu++;
+      if (e.buuk === 'Kyllä') data[key].buukki++;
+    });
+
+    const active = segments.filter(s => data[s].soitettu > 0);
+    if (active.length === 0) return;
+
+    const maxSoitettu = Math.max(...active.map(s => data[s].soitettu));
+
+    const rows = active.map(seg => {
+      const d = data[seg];
+      const pct = maxSoitettu > 0 ? Math.round(d.soitettu / maxSoitettu * 100) : 0;
+      const conv = d.soitettu > 0 ? Math.round(d.vastattu / d.soitettu * 100) : 0;
+      return `
+        <div class="seg-row">
+          <div class="seg-name">${seg}</div>
+          <div class="seg-num" style="color:#7a8fa6" title="Soitettu">📞${d.soitettu}</div>
+          <div class="seg-num" style="color:#2ecc71" title="Vastattu">✅${d.vastattu}</div>
+          <div class="seg-num" style="color:#cc44ff" title="Buukki">📅${d.buukki}</div>
+          <div class="seg-num" style="color:#00c6ff;font-size:11px">${conv}%</div>
+        </div>
+        <div style="padding:0 4px 6px"><div class="seg-bar-wrap"><div class="seg-bar" style="width:${pct}%"></div></div></div>`;
+    }).join('');
+
+    document.getElementById('segSummaryBody').innerHTML = `
+      <div class="seg-row seg-row-hdr" style="padding-bottom:6px;border-bottom:1px solid #243347">
+        <div>Segmentti</div>
+        <div style="text-align:center">Soit.</div>
+        <div style="text-align:center">Vast.</div>
+        <div style="text-align:center">Buuk.</div>
+        <div style="text-align:center">Konv.</div>
+      </div>
+      ${rows}`;
+
+    document.getElementById('segSummaryWrap').style.display = 'block';
+  }
+
+  function renderLog() {
+    if (log.length === 0) return;
+    const warmTag = { 'Lämmin': 'tag-warm', 'Neutraali': 'tag-neu', 'Kylmä': 'tag-cold' };
+    const rows = log.map((e, i) => `
+      <tr>
+        <td>${log.length - i}</td>
+        <td>${e.date} ${e.time}</td>
+        <td>${e.seg}</td>
+        <td><span class="tag ${e.ans === 'Kyllä' ? 'tag-yes' : 'tag-no'}">${e.ans}</span></td>
+        <td><span class="tag ${e.buuk === 'Kyllä' ? 'tag-yes' : 'tag-no'}">${e.buuk === 'Kyllä' ? '📅' : '–'}</span></td>
+        <td><span class="tag ${warmTag[e.warm]}">${e.warm}</span></td>
+        <td style="color:#2ecc71;font-weight:700">${e.earnings > 0 ? '€'+e.earnings : '–'}</td>
+      </tr>`).join('');
+
+    document.getElementById('logBody').innerHTML = `
+      <table>
+        <thead><tr>
+          <th>#</th><th>Aika</th><th>Segmentti</th><th>Vastaus</th><th>Buukki</th><th>Lämpö</th><th>€</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+
+    const answered = log.filter(e => e.ans === 'Kyllä').length;
+    document.getElementById('logStats').textContent = '€' + (answered * 5) + ' tänään';
+
+    renderSegmentSummary();
+  }
+</script>
+</body>
+</html>
