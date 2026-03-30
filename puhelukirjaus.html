@@ -394,7 +394,8 @@
   let currentUser = null;
 
   function setUser(name) {
-    currentUser = name;  // Samuli tai Aki — säilyttää ison alkukirjaimen
+    currentUser = name;
+    document.getElementById('userScreen').style.display = 'none';
     const badge = document.getElementById('userBadge');
     badge.textContent = name;
     badge.style.display = 'inline-block';
