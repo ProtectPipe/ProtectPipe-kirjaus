@@ -229,6 +229,8 @@
   .user-btn.samuli:hover { background: #0077cc; }
   .user-btn.aki    { border-color: #cc44ff; }
   .user-btn.aki:hover    { background: #6a1aaa; }
+  .user-btn.jere   { border-color: #00b894; }
+  .user-btn.jere:hover   { background: #007a5e; }
   #userBadge {
     display: inline-block;
     padding: 4px 12px;
@@ -274,6 +276,7 @@
   <p>Kuka kirjaa puheluita tänään?</p>
   <button class="user-btn samuli" onclick="setUser('Samuli')">👤 Samuli</button>
   <button class="user-btn aki"    onclick="setUser('Aki')">👤 Aki</button>
+  <button class="user-btn jere"   onclick="setUser('Jere')">👤 Jere</button>
 </div>
 
 <!-- EARNINGS BAR -->
@@ -298,9 +301,6 @@
     </button>
     <button class="btn seg" onclick="select('seg', 'Kiinteistöpäällikkö', this)">
       <span class="btn-icon">🔑</span>Kiinteistöpääl.
-    </button>
-    <button class="btn seg" onclick="select('seg', 'Taloyhtiö', this)">
-      <span class="btn-icon">🏠</span>Taloyhtiö
     </button>
     <button class="btn seg" onclick="select('seg', 'HPJ', this)">
       <span class="btn-icon">👔</span>HPJ
@@ -399,7 +399,7 @@
     const badge = document.getElementById('userBadge');
     badge.textContent = name;
     badge.style.display = 'inline-block';
-    badge.style.background = name === 'Samuli' ? '#0077cc' : '#6a1aaa';
+    badge.style.background = name === 'Samuli' ? '#0077cc' : name === 'Aki' ? '#6a1aaa' : '#00b894';
     badge.title = 'Vaihda käyttäjä';
   }
 
@@ -547,7 +547,7 @@
   }
 
   function renderSegmentSummary() {
-    const segments = ['Isännöitsijä','Kiinteistöpäällikkö','Taloyhtiö','HPJ','Ravintola','Julkinen sektori'];
+    const segments = ['Isännöitsijä','Kiinteistöpäällikkö','HPJ','Ravintola','Julkinen sektori'];
     const data = {};
     segments.forEach(s => data[s] = { soitettu: 0, vastattu: 0, buukki: 0 });
 
